@@ -50,7 +50,12 @@ public class MoveController : MonoBehaviour
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
-
+        
+        if(isGrounded && Input.GetButtonDown("Jump"))
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+        
         velocity.y += gravity * 2f * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
