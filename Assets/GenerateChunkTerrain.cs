@@ -16,9 +16,8 @@ public class GenerateChunkTerrain : MonoBehaviour
     [SerializeField]
     private static float scale = 0.05f;
 
-    [SerializeField]
-    private static int seed = 1;
-
+    public int offset;
+    
     [SerializeField]
     private Material material;
 
@@ -26,7 +25,6 @@ public class GenerateChunkTerrain : MonoBehaviour
 
     private void Start()
     {
-
         gameObject.transform.position *= chunkSize; // transform position based on chunksize
 
         float startTime = Time.realtimeSinceStartup; // Debug
@@ -44,7 +42,7 @@ public class GenerateChunkTerrain : MonoBehaviour
             {
                 for (int z = 0; z < chunkSize; z++)
                 {
-                    float noiseValue = Perlin3D((x + seed + gameObject.transform.position.x) * scale, (y + seed + gameObject.transform.position.y) * scale, (z + seed + gameObject.transform.position.z) * scale);
+                    float noiseValue = Perlin3D((x + offset + gameObject.transform.position.x) * scale, (y + offset + gameObject.transform.position.y) * scale, (z + offset + gameObject.transform.position.z) * scale);
                     if (noiseValue >= threshold)
                     {
                         voxelMesh.transform.position = new Vector3(x + gameObject.transform.position.x, y + gameObject.transform.position.y, z + gameObject.transform.position.z);
@@ -94,7 +92,8 @@ public class GenerateChunkTerrain : MonoBehaviour
         gameObject.transform.SetParent(GameObject.Find("Terrain").transform); // set parent to Terrain object
 
         if(gameObject.transform.childCount > 0)
-            GameObject.Destroy(gameObject.transform.GetChild(0).gameObject); // remove the extra child mesh from the original chunk created, as other chunks are instantiated from that one
+            for(int i = 0; i < gameObject.transform.childCount; i++)
+                GameObject.Destroy(gameObject.transform.GetChild(i).gameObject); // remove the extra child mesh from the original chunk created, as other chunks are instantiated from that one
 
         foreach (List<CombineInstance> data in voxelDataLists)
         {
