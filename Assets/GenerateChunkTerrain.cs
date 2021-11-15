@@ -26,9 +26,10 @@ public class GenerateChunkTerrain : MonoBehaviour
 
     private void Start()
     {
-        gameObject.transform.position *= chunkSize;
 
-        float startTime = Time.realtimeSinceStartup;
+        gameObject.transform.position *= chunkSize; // transform position based on chunksize
+
+        float startTime = Time.realtimeSinceStartup; // Debug
 
         #region Instantiate Chunk Terrain
 
@@ -75,7 +76,7 @@ public class GenerateChunkTerrain : MonoBehaviour
         for(int i = 0; i < voxelData.Count; i++)
         {
             vertexCount += voxelData[i].mesh.vertexCount;
-            if(vertexCount > 65536)
+            if(vertexCount > 65536) // if > 65536, then we need to add all these verticies to a mesh and make a new one
             {
                 vertexCount = 0;
                 voxelDataLists.Add(new List<CombineInstance>());
@@ -90,26 +91,28 @@ public class GenerateChunkTerrain : MonoBehaviour
 
         #region Create Chunk Mesh
 
-        gameObject.transform.SetParent(GameObject.Find("Terrain").transform);
+        gameObject.transform.SetParent(GameObject.Find("Terrain").transform); // set parent to Terrain object
 
         if(gameObject.transform.childCount > 0)
-            GameObject.Destroy(gameObject.transform.GetChild(0).gameObject);
+            GameObject.Destroy(gameObject.transform.GetChild(0).gameObject); // remove the extra child mesh from the original chunk created, as other chunks are instantiated from that one
 
         foreach (List<CombineInstance> data in voxelDataLists)
         {
 
-            GameObject chunkMesh = new GameObject("ChunkMesh");
+            GameObject chunkMesh = new GameObject("ChunkMesh"); // Create a new mesh gameobject
 
-            chunkMesh.transform.parent = gameObject.transform;
+            chunkMesh.layer = LayerMask.NameToLayer("Ground"); // set chunkmesh layer to groundMask Layer to allow for character controller collision checking
+
+            chunkMesh.transform.parent = gameObject.transform; // set parent to this current Chunk
 
             MeshFilter meshFilter = chunkMesh.AddComponent<MeshFilter>(); // add mesh filter
             MeshRenderer meshRenderer = chunkMesh.AddComponent<MeshRenderer>(); // add mesh renderer
 
-            meshRenderer.material = material;
+            meshRenderer.material = material; // set material
 
             meshFilter.mesh.CombineMeshes(data.ToArray()); // set mesh to voxelData
 
-            meshes.Add(meshFilter.mesh);
+            meshes.Add(meshFilter.mesh); // add mesh 
 
             chunkMesh.AddComponent<MeshCollider>().sharedMesh = meshFilter.sharedMesh; // create a collider for the mesh
         }

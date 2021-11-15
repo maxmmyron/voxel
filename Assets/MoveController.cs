@@ -8,16 +8,34 @@ public class MoveController : MonoBehaviour
     private CharacterController controller;
 
     [SerializeField]
+    private Transform groundChecker;
+
+    [SerializeField]
     private float movementSpeed = 10f;
 
     [SerializeField]
     private float gravity = -9.81f;
 
+    [SerializeField]
+    private float groundCheckDistance = 0.1f;
+
+    [SerializeField]
+    private LayerMask groundMask;
+
     Vector3 velocity;
+    bool isGrounded;
 
     // Update is called once per frame
     void Update()
     {
+        isGrounded = Physics.CheckSphere(groundChecker.position, groundCheckDistance, groundMask);
+
+        if(isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+            Debug.Log("touching ground");
+        }
+
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
