@@ -10,10 +10,6 @@ public class GenerateTerrain : MonoBehaviour
     [SerializeField]
     private int terrainSize = 2;
 
-    [SerializeField]
-    private int chunkSize = 2;
-
-    // Start is called before the first frame update
     private void Start()
     {
         for (int x = 0; x < terrainSize; x++)
@@ -23,9 +19,7 @@ public class GenerateTerrain : MonoBehaviour
                 for (int z = 0; z < terrainSize; z++)
                 {
                     GameObject chunkPrefab = Instantiate(Chunk) as GameObject;
-                    chunkPrefab.transform.position = new Vector3(x * chunkSize, y * chunkSize, z * chunkSize);
-                    chunkPrefab.GetComponent<GenerateChunkTerrain>().chunkSize = chunkSize;
-                    chunkPrefab.GetComponent<GenerateChunkTerrain>().offset = new Vector3(x * chunkSize, y * chunkSize, z * chunkSize);
+                    chunkPrefab.transform.position = new Vector3(x, y, z);
                 }
             }
         }
