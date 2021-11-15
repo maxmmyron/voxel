@@ -92,8 +92,12 @@ public class GenerateChunkTerrain : MonoBehaviour
 
         gameObject.transform.SetParent(GameObject.Find("Terrain").transform);
 
-        foreach(List<CombineInstance> data in voxelDataLists)
+        if(gameObject.transform.childCount > 0)
+            GameObject.Destroy(gameObject.transform.GetChild(0).gameObject);
+
+        foreach (List<CombineInstance> data in voxelDataLists)
         {
+
             GameObject chunkMesh = new GameObject("ChunkMesh");
 
             chunkMesh.transform.parent = gameObject.transform;
