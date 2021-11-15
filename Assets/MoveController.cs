@@ -45,13 +45,18 @@ public class MoveController : MonoBehaviour
         Vector3 move = transform.right * x + transform.forward * z; // relative movement based on direction player is moving
 
         controller.Move(move * movementSpeed * Time.deltaTime);
-
+        
         if(isGrounded && Input.GetButtonDown("Jump"))
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
-
-        velocity.y += gravity * Time.deltaTime;
+        
+        if(isGrounded && Input.GetButtonDown("Jump"))
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+        
+        velocity.y += gravity * 2f * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
     }
