@@ -19,9 +19,9 @@ public class GenerateChunkTerrain : MonoBehaviour
     [SerializeField]
     private Material material;
 
-    public int seed;
+    public Vector3 noiseOffset;
 
-    private int[,,] voxelPoints = new int[chunkSize+2, chunkSize, chunkSize+2];
+    private int[,,] voxelPoints = new int[chunkSize+2, chunkSize+2, chunkSize+2];
 
     private void Start()
     {
@@ -30,6 +30,9 @@ public class GenerateChunkTerrain : MonoBehaviour
         GenerateNoisePoints(voxelPoints);
 
         BuildMesh(voxelPoints);
+
+        gameObject.transform.parent = GameObject.Find("Terrain").transform;
+        gameObject.layer = LayerMask.NameToLayer("Ground");
     }
 
     // Generates a 3D array of block types, where 0 is ground and 1 is air. 
@@ -39,7 +42,7 @@ public class GenerateChunkTerrain : MonoBehaviour
             for(int y = 0; y < pointArray.GetLength(1); y++)
                 for(int z = 0; z < pointArray.GetLength(2); z++)
                 {
-                    float noiseValue = Perlin3D((x + gameObject.transform.position.x + seed) * scale, (y + gameObject.transform.position.y + seed) * scale, (z + gameObject.transform.position.z + seed) * scale);
+                    float noiseValue = Perlin3D((x + gameObject.transform.position.x + noiseOffset.x) * scale, (y + gameObject.transform.position.y + noiseOffset.y) * scale, (z + gameObject.transform.position.z + noiseOffset.z) * scale);
                     pointArray[x, y, z] = noiseValue >= threshold ? 0 : 1;
                 }
     }
@@ -53,7 +56,7 @@ public class GenerateChunkTerrain : MonoBehaviour
 
         for (int x = 1; x < pointArray.GetLength(0) - 1; x++)
             for (int z = 1; z < pointArray.GetLength(2) - 1; z++)
-                for (int y = 0; y < pointArray.GetLength(1); y++)
+                for (int y = 1; y < pointArray.GetLength(1) - 1; y++)
                 {
                     if (pointArray[x, y, z] != 1)
                     {
