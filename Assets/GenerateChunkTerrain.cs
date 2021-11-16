@@ -137,6 +137,8 @@ public class GenerateChunkTerrain : MonoBehaviour
         GetComponent<MeshFilter>().mesh = chunkMesh;
         GetComponent<MeshFilter>().sharedMesh = chunkMesh;
 
+        GetComponent<MeshCollider>().sharedMesh = chunkMesh;
+
         GetComponent<MeshRenderer>().material = material;
     }
 
