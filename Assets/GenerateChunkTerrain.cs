@@ -8,118 +8,138 @@ public class GenerateChunkTerrain : MonoBehaviour
     [SerializeField]
     private GameObject prefab;
 
-    public int chunkSize = 16;
+    public static int chunkSize = 16;
 
     [SerializeField]
-    private static float threshold = 0.5f;
+    private float threshold = 0.5f;
 
     [SerializeField]
-    private static float scale = 0.05f;
-
-    public int offset;
+    private float scale = 0.05f;
     
     [SerializeField]
     private Material material;
 
-    private List<Mesh> meshes = new List<Mesh>();
+    public Vector3 noiseOffset;
+
+    private int[,,] voxelPoints = new int[chunkSize+2, chunkSize+2, chunkSize+2];
 
     private void Start()
     {
         gameObject.transform.position *= chunkSize; // transform position based on chunksize
 
-        float startTime = Time.realtimeSinceStartup; // Debug
+        GenerateNoisePoints(voxelPoints);
 
-        #region Instantiate Chunk Terrain
+        BuildMesh(voxelPoints);
 
-        List<CombineInstance> voxelData = new List<CombineInstance>(); // create a list to describe all of the prefab meshes to be combined together later
+        gameObject.transform.parent = GameObject.Find("Terrain").transform;
+        gameObject.layer = LayerMask.NameToLayer("Ground");
+    }
 
-        MeshFilter voxelMesh = Instantiate(prefab, Vector3.zero, Quaternion.identity).GetComponent<MeshFilter>(); // Create a single prefab and store only the mesh from it
-        
-        // loop through the entire chunk
-        for (int x = 0; x < chunkSize; x++)
-        {
-            for (int y = 0; y < chunkSize; y++)
-            {
-                for (int z = 0; z < chunkSize; z++)
+    // Generates a 3D array of block types, where 0 is ground and 1 is air. 
+    private void GenerateNoisePoints(int[,,] pointArray)
+    {
+        for(int x = 0; x < pointArray.GetLength(0); x++)
+            for(int y = 0; y < pointArray.GetLength(1); y++)
+                for(int z = 0; z < pointArray.GetLength(2); z++)
                 {
-                    float noiseValue = Perlin3D((x + offset + gameObject.transform.position.x) * scale, (y + offset + gameObject.transform.position.y) * scale, (z + offset + gameObject.transform.position.z) * scale);
-                    if (noiseValue >= threshold)
+                    float noiseValue = Perlin3D((x + gameObject.transform.position.x + noiseOffset.x) * scale, (y + gameObject.transform.position.y + noiseOffset.y) * scale, (z + gameObject.transform.position.z + noiseOffset.z) * scale);
+                    pointArray[x, y, z] = noiseValue >= threshold ? 0 : 1;
+                }
+    }
+
+    private void BuildMesh(int[,,] pointArray)
+    {
+        Mesh chunkMesh = new Mesh();
+
+        List<Vector3> meshVertices = new List<Vector3>();
+        List<int> meshTriangles = new List<int>();
+
+        for (int x = 1; x < pointArray.GetLength(0) - 1; x++)
+            for (int z = 1; z < pointArray.GetLength(2) - 1; z++)
+                for (int y = 1; y < pointArray.GetLength(1) - 1; y++)
+                {
+                    if (pointArray[x, y, z] != 1)
                     {
-                        voxelMesh.transform.position = new Vector3(x + gameObject.transform.position.x, y + gameObject.transform.position.y, z + gameObject.transform.position.z);
-                        //voxelMesh.sharedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                        Vector3 voxelPos = new Vector3(x - 1, y, z - 1);
 
-                        CombineInstance combineInstance = new CombineInstance
+                        int numFaces = 0;
+                        //no land above, build top face
+                        if (y < pointArray.GetLength(1) - 1 && pointArray[x, y + 1, z] == 1)
                         {
-                            mesh = voxelMesh.sharedMesh,
-                            transform = voxelMesh.transform.localToWorldMatrix,
-                        }; // copy the mesh and transform data off of the prefab voxel
+                            meshVertices.Add(voxelPos + new Vector3(0, 1, 0));
+                            meshVertices.Add(voxelPos + new Vector3(0, 1, 1));
+                            meshVertices.Add(voxelPos + new Vector3(1, 1, 1));
+                            meshVertices.Add(voxelPos + new Vector3(1, 1, 0));
+                            numFaces++;
+                        }
 
-                        voxelData.Add(combineInstance); // add the voxel data to the voxelData list
+                        //bottom
+                        if (y > 0 && pointArray[x, y - 1, z] == 1)
+                        {
+                            meshVertices.Add(voxelPos + new Vector3(0, 0, 0));
+                            meshVertices.Add(voxelPos + new Vector3(1, 0, 0));
+                            meshVertices.Add(voxelPos + new Vector3(1, 0, 1));
+                            meshVertices.Add(voxelPos + new Vector3(0, 0, 1));
+                            numFaces++;
+                        }
+
+                        //front
+                        if (pointArray[x, y, z - 1] == 1)
+                        {
+                            meshVertices.Add(voxelPos + new Vector3(0, 0, 0));
+                            meshVertices.Add(voxelPos + new Vector3(0, 1, 0));
+                            meshVertices.Add(voxelPos + new Vector3(1, 1, 0));
+                            meshVertices.Add(voxelPos + new Vector3(1, 0, 0));
+                            numFaces++;
+                        }
+
+                        //right
+                        if (pointArray[x + 1, y, z] == 1)
+                        {
+                            meshVertices.Add(voxelPos + new Vector3(1, 0, 0));
+                            meshVertices.Add(voxelPos + new Vector3(1, 1, 0));
+                            meshVertices.Add(voxelPos + new Vector3(1, 1, 1));
+                            meshVertices.Add(voxelPos + new Vector3(1, 0, 1));
+                            numFaces++;
+                        }
+
+                        //back
+                        if (pointArray[x, y, z + 1] == 1)
+                        {
+                            meshVertices.Add(voxelPos + new Vector3(1, 0, 1));
+                            meshVertices.Add(voxelPos + new Vector3(1, 1, 1));
+                            meshVertices.Add(voxelPos + new Vector3(0, 1, 1));
+                            meshVertices.Add(voxelPos + new Vector3(0, 0, 1));
+                            numFaces++;
+                        }
+
+                        //left
+                        if (pointArray[x - 1, y, z] == 1)
+                        {
+                            meshVertices.Add(voxelPos + new Vector3(0, 0, 1));
+                            meshVertices.Add(voxelPos + new Vector3(0, 1, 1));
+                            meshVertices.Add(voxelPos + new Vector3(0, 1, 0));
+                            meshVertices.Add(voxelPos + new Vector3(0, 0, 0));
+                            numFaces++;
+                        }
+
+
+                        int tl = meshVertices.Count - 4 * numFaces;
+                        for (int i = 0; i < numFaces; i++)
+                            meshTriangles.AddRange(new int[] { tl + i * 4, tl + i * 4 + 1, tl + i * 4 + 2, tl + i * 4, tl + i * 4 + 2, tl + i * 4 + 3 });
                     }
                 }
-            }
-        }
+        chunkMesh.vertices = meshVertices.ToArray();
+        chunkMesh.triangles = meshTriangles.ToArray();
 
-        Destroy(voxelMesh.gameObject); // remove the original voxel prefab
+        chunkMesh.RecalculateNormals();
 
-        #endregion
+        GetComponent<MeshFilter>().mesh = chunkMesh;
+        GetComponent<MeshFilter>().sharedMesh = chunkMesh;
 
-        #region Seperate Chunk Data
+        GetComponent<MeshCollider>().sharedMesh = chunkMesh;
 
-        List<List<CombineInstance>> voxelDataLists = new List<List<CombineInstance>>(); // create a list of lists to store 
-
-        int vertexCount = 0;
-
-        voxelDataLists.Add(new List<CombineInstance>());
-        for(int i = 0; i < voxelData.Count; i++)
-        {
-            vertexCount += voxelData[i].mesh.vertexCount;
-            if(vertexCount > 65536) // if > 65536, then we need to add all these verticies to a mesh and make a new one
-            {
-                vertexCount = 0;
-                voxelDataLists.Add(new List<CombineInstance>());
-                i--;
-            } else
-            {
-                voxelDataLists.Last().Add(voxelData[i]);
-            }
-        }
-
-        #endregion
-
-        #region Create Chunk Mesh
-
-        gameObject.transform.SetParent(GameObject.Find("Terrain").transform); // set parent to Terrain object
-
-        if(gameObject.transform.childCount > 0)
-            for(int i = 0; i < gameObject.transform.childCount; i++)
-                GameObject.Destroy(gameObject.transform.GetChild(i).gameObject); // remove the extra child mesh from the original chunk created, as other chunks are instantiated from that one
-
-        foreach (List<CombineInstance> data in voxelDataLists)
-        {
-
-            GameObject chunkMesh = new GameObject("ChunkMesh"); // Create a new mesh gameobject
-
-            chunkMesh.layer = LayerMask.NameToLayer("Ground"); // set chunkmesh layer to groundMask Layer to allow for character controller collision checking
-
-            chunkMesh.transform.parent = gameObject.transform; // set parent to this current Chunk
-
-            MeshFilter meshFilter = chunkMesh.AddComponent<MeshFilter>(); // add mesh filter
-            MeshRenderer meshRenderer = chunkMesh.AddComponent<MeshRenderer>(); // add mesh renderer
-
-            meshRenderer.material = material; // set material
-
-            meshFilter.mesh.CombineMeshes(data.ToArray()); // set mesh to voxelData
-
-            meshes.Add(meshFilter.mesh); // add mesh 
-
-            chunkMesh.AddComponent<MeshCollider>().sharedMesh = meshFilter.sharedMesh; // create a collider for the mesh
-        }
-
-        #endregion
-
-        Debug.Log("Load time: " + (Time.realtimeSinceStartup - startTime) + "s");
-
+        GetComponent<MeshRenderer>().material = material;
     }
 
     public static float Perlin3D(float x, float y, float z)

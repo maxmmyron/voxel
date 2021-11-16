@@ -8,12 +8,10 @@ public class GenerateTerrain : MonoBehaviour
     private GameObject Chunk;
 
     [SerializeField]
-    private int terrainSize = 2;
+    private int terrainSize = 8;
 
     [SerializeField]
-    private int offset = 1;
-
-    private int oldOffset;
+    private Vector3 noiseOffset;
 
     private void Generate()
     {
@@ -25,7 +23,7 @@ public class GenerateTerrain : MonoBehaviour
                 {
                     GameObject chunkPrefab = Instantiate(Chunk) as GameObject;
                     chunkPrefab.transform.position = new Vector3(x, y, z);
-                    chunkPrefab.GetComponent<GenerateChunkTerrain>().offset = offset;
+                    chunkPrefab.GetComponent<GenerateChunkTerrain>().noiseOffset = noiseOffset;
                 }
             }
         }
@@ -33,19 +31,7 @@ public class GenerateTerrain : MonoBehaviour
 
     private void Start()
     {
-        oldOffset = offset;
+        noiseOffset = new Vector3(Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f));
         Generate();
-    }
-
-    
-    private void Update()
-    {
-        if (oldOffset != offset)
-        {
-            for (int i = 1; i < gameObject.transform.childCount; i++)
-                GameObject.Destroy(gameObject.transform.GetChild(i).gameObject);
-            Generate();
-            oldOffset = offset;
-        }
     }
 }
