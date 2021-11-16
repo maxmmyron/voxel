@@ -36,6 +36,7 @@ public class MoveController : MonoBehaviour
         if(isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;
+            controller.slopeLimit = 45f;
         }
 
         float x = Input.GetAxis("Horizontal");
@@ -48,6 +49,7 @@ public class MoveController : MonoBehaviour
         if(isGrounded && Input.GetButtonDown("Jump"))
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            controller.slopeLimit = 90f;
         }
         
         velocity.y += gravity * 2f * Time.deltaTime;
