@@ -36,7 +36,6 @@ public class MoveController : MonoBehaviour
         if(isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;
-            Debug.Log("touching ground");
         }
 
         float x = Input.GetAxis("Horizontal");
