@@ -135,7 +135,8 @@ GameObject:
   - component: {fileID: 3785840}
   - component: {fileID: 3785842}
   - component: {fileID: 3785843}
-  m_Layer: 0
+  - component: {fileID: 3785844}
+  m_Layer: 6
   m_Name: Chunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,7 +159,7 @@ MonoBehaviour:
   threshold: 0.5
   scale: 0.05
   material: {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
-  seed: 0
+  noiseOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &3785841
 Transform:
   m_ObjectHideFlags: 0
@@ -222,6 +223,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &3785844
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3785839}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
 --- !u!1 &460241442
 GameObject:
   m_ObjectHideFlags: 0
@@ -563,7 +578,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1892978695}
   - component: {fileID: 1892978694}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -584,6 +599,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Chunk: {fileID: 3785839}
   terrainSize: 2
+  noiseOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &1892978695
 Transform:
   m_ObjectHideFlags: 0
