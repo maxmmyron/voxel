@@ -155,10 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97305fa99cc50fb4b9ff0331e1453454, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  threshold: 0
-  scale: 1
   material: {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
-  noiseOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &3785841
 Transform:
   m_ObjectHideFlags: 0
@@ -586,6 +583,9 @@ MonoBehaviour:
   chunkSize: 16
   noiseOffset: {x: 0, y: 0, z: 0}
   renderDistance: 4
+  terrainThreshold: 0
+  secondsToWait: 0.1
+  terrainScale: 1.5
 --- !u!4 &1892978695
 Transform:
   m_ObjectHideFlags: 0
@@ -626,7 +626,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1976780364}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 105, y: 174.9, z: 32}
+  m_LocalPosition: {x: 80, y: 174.9, z: 32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 460241443}
@@ -674,4 +674,4 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  debug: 1
+  debug: 0
