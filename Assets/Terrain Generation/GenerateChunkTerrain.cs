@@ -5,49 +5,44 @@ using UnityEngine;
 
 public class GenerateChunkTerrain : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject prefab;
+    public static int chunkSize;
 
-    public static int chunkSize = 16;
+    //[SerializeField]
+    //private float threshold = 0.0f;
 
-    [SerializeField]
-    private float threshold = 0.5f;
-
-    [SerializeField]
-    private float scale = 0.05f;
+    //[SerializeField]
+    //private float scale = 0.05f;
     
     [SerializeField]
     private Material material;
 
-    public Vector3 noiseOffset;
+    //public Vector3 noiseOffset;
 
-    private int[,,] voxelPoints = new int[chunkSize+2, chunkSize+2, chunkSize+2];
+    public int[,,] voxelPoints = new int[chunkSize+2, chunkSize+2, chunkSize+2];
 
     private void Start()
     {
-        gameObject.transform.position *= chunkSize; // transform position based on chunksize
-
-        GenerateNoisePoints(voxelPoints);
-
-        BuildMesh(voxelPoints);
-
         gameObject.transform.parent = GameObject.Find("Terrain").transform;
         gameObject.layer = LayerMask.NameToLayer("Ground");
+
+        //GenerateNoisePoints(voxelPoints);
+
+        //BuildMesh(voxelPoints);
     }
 
     // Generates a 3D array of block types, where 0 is ground and 1 is air. 
-    private void GenerateNoisePoints(int[,,] pointArray)
+    /*private void GenerateNoisePoints(int[,,] pointArray)
     {
         for(int x = 0; x < pointArray.GetLength(0); x++)
             for(int y = 0; y < pointArray.GetLength(1); y++)
                 for(int z = 0; z < pointArray.GetLength(2); z++)
                 {
-                    float noiseValue = Perlin3D((x + gameObject.transform.position.x + noiseOffset.x) * scale, (y + gameObject.transform.position.y + noiseOffset.y) * scale, (z + gameObject.transform.position.z + noiseOffset.z) * scale);
+                    float noiseValue = noise.GetSimplex((x + gameObject.transform.position.x) * scale, (y + gameObject.transform.position.y) * scale, (z + gameObject.transform.position.z) * scale);
                     pointArray[x, y, z] = noiseValue >= threshold ? 0 : 1;
                 }
-    }
+    }*/
 
-    private void BuildMesh(int[,,] pointArray)
+    public void BuildMesh(int[,,] pointArray)
     {
         Mesh chunkMesh = new Mesh();
 
@@ -142,17 +137,17 @@ public class GenerateChunkTerrain : MonoBehaviour
         GetComponent<MeshRenderer>().material = material;
     }
 
-    public static float Perlin3D(float x, float y, float z)
+    /*public static float Fast3D(float x, float y, float z)
     {
-        float ab = Mathf.PerlinNoise(x, y);
-        float bc = Mathf.PerlinNoise(y, z);
-        float ac = Mathf.PerlinNoise(x, z);
+        float ab = noise.GetSimplex(x, y);
+        float bc = noise.GetSimplex(y, z);
+        float ac = noise.GetSimplex(x, z);
 
-        float ba = Mathf.PerlinNoise(y, x);
-        float cb = Mathf.PerlinNoise(z, y);
-        float ca = Mathf.PerlinNoise(z, x);
+        float ba = noise.GetSimplex(y, x);
+        float cb = noise.GetSimplex(z, y);
+        float ca = noise.GetSimplex(z, x);
 
         float abc = ab + bc + ac + ba + cb + ca;
         return abc / 6f;
-    }
+    }*/
 }

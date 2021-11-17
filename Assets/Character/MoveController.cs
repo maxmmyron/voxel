@@ -28,32 +28,38 @@ public class MoveController : MonoBehaviour
     Vector3 velocity;
     bool isGrounded;
 
+    [SerializeField]
+    private bool debug = false;
+
     // Update is called once per frame
     void Update()
     {
-        isGrounded = Physics.CheckSphere(groundChecker.position, groundCheckDistance, groundMask);
-
-        if(isGrounded && velocity.y < 0)
+        if (!debug)
         {
-            velocity.y = -2f;
-            controller.slopeLimit = 45f;
+            isGrounded = Physics.CheckSphere(groundChecker.position, groundCheckDistance, groundMask);
+
+            if (isGrounded && velocity.y < 0)
+            {
+                velocity.y = -2f;
+                controller.slopeLimit = 45f;
+            }
+
+            float x = Input.GetAxis("Horizontal");
+            float z = Input.GetAxis("Vertical");
+
+            Vector3 move = transform.right * x + transform.forward * z; // relative movement based on direction player is moving
+
+            controller.Move(move * movementSpeed * Time.deltaTime);
+
+            if (isGrounded && Input.GetButtonDown("Jump"))
+            {
+                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                controller.slopeLimit = 90f;
+            }
+
+            velocity.y += gravity * 2f * Time.deltaTime;
+
+            controller.Move(velocity * Time.deltaTime);
         }
-
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
-
-        Vector3 move = transform.right * x + transform.forward * z; // relative movement based on direction player is moving
-
-        controller.Move(move * movementSpeed * Time.deltaTime);
-        
-        if(isGrounded && Input.GetButtonDown("Jump"))
-        {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            controller.slopeLimit = 90f;
-        }
-        
-        velocity.y += gravity * 2f * Time.deltaTime;
-
-        controller.Move(velocity * Time.deltaTime);
     }
 }
