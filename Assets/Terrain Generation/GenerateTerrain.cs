@@ -21,6 +21,9 @@ public class GenerateTerrain : MonoBehaviour
 
     [SerializeField]
     private float terrainThreshold = 0f;
+    
+    [SerializeField]
+    private float secondsToWait = 0.2f;
 
     [SerializeField]
     private float terrainScale = 0.5f;
@@ -153,6 +156,6 @@ public class GenerateTerrain : MonoBehaviour
             ungeneratedChunks.RemoveAt(0);
         }
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(secondsToWait);
     }
 }
