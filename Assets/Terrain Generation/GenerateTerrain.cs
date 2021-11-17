@@ -5,46 +5,154 @@ using UnityEngine;
 public class GenerateTerrain : MonoBehaviour
 {
     [SerializeField]
-    private GameObject Chunk;
+    private GameObject chunk;
 
     [SerializeField]
-    private int terrainSize = 8;
+    private Transform character;
+
+    [SerializeField]
+    private int chunkSize = 16;
 
     [SerializeField]
     private Vector3 noiseOffset;
 
-    private void Generate()
-    {
-        for (int x = 0; x < terrainSize; x++)
-        {
-            for (int y = 0; y < terrainSize; y++)
-            {
-                for (int z = 0; z < terrainSize; z++)
-                {
-                    GameObject chunkPrefab = Instantiate(Chunk) as GameObject;
-                    chunkPrefab.transform.position = new Vector3(x, y, z);
-                    chunkPrefab.GetComponent<GenerateChunkTerrain>().noiseOffset = noiseOffset;
-                }
-            }
-        }
-    }
+    [SerializeField]
+    private int renderDistance = 8;
+
+    [SerializeField]
+    private float terrainThreshold = 0f;
+
+    [SerializeField]
+    private float terrainScale = 0.5f;
+
+    public static Dictionary<Vector3, GenerateChunkTerrain> chunks = new Dictionary<Vector3, GenerateChunkTerrain>();
+
+    List<GenerateChunkTerrain> chunkPool = new List<GenerateChunkTerrain>();
+
+    List<Vector3> ungeneratedChunks = new List<Vector3>();
+
+    private static FastNoiseLite noise = new FastNoiseLite();
 
     private void Start()
     {
-        noiseOffset = new Vector3(Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f));
-        Generate();
+        GenerateChunkTerrain.chunkSize = chunkSize;
+        GenerateChunks(true);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown("g"))
+        GenerateChunks();
+    }
+
+    // Build a new chunk
+    private void BuildChunk(Vector3 chunkPosition)
+    {
+        GenerateChunkTerrain chunkToBuild; // Create a new GenerateChunkTerrain
+        if(chunkPool.Count > 0) // if there are already chunks in the pool
         {
-            for(int i = 1; i < transform.childCount; i++)
-            {
-                GameObject.Destroy(transform.GetChild(i).gameObject);
-            }
-            noiseOffset = new Vector3(Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f));
-            Generate();
+            chunkToBuild = chunkPool[0]; // set chunk to build as oldest pooled chunk
+            chunkToBuild.gameObject.SetActive(true); // set active
+            chunkPool.RemoveAt(0); // we are storing the oldest pooled chunk, so we can safely remove it from the cunk pool
+            chunkToBuild.transform.position = chunkPosition; // set position
         }
+        else // if there are no chunks in the pool
+        {
+            GameObject chunkGameObject = Instantiate(chunk, chunkPosition, Quaternion.identity); // instantiate a new chunk
+            chunkToBuild = chunkGameObject.GetComponent<GenerateChunkTerrain>();
+        }
+
+        for (int x = 0; x < chunkToBuild.voxelPoints.GetLength(0); x++)
+            for (int y = 0; y < chunkToBuild.voxelPoints.GetLength(1); y++)
+                for (int z = 0; z < chunkToBuild.voxelPoints.GetLength(2); z++)
+                {
+                    chunkToBuild.voxelPoints[x, y, z] = noise.GetNoise((x + chunkPosition.x) * terrainScale, (y + chunkPosition.y) * terrainScale, (z + chunkPosition.z) * terrainScale) >= terrainThreshold ? 0 : 1;
+                }
+
+        chunkToBuild.BuildMesh(chunkToBuild.voxelPoints);
+
+        chunks.Add(chunkPosition, chunkToBuild);
+    }
+
+    // Generate chunks
+    Vector3 oldCharacterChunkPosition = new Vector3(-1, -1, -1);
+    private void GenerateChunks(bool generateInstantly = false)
+    {
+        //get the position for the chunk the character is currently in
+        Vector3 characterChunkPosition = new Vector3(
+            Mathf.FloorToInt(character.position.x / chunkSize) * chunkSize,
+            Mathf.FloorToInt(character.position.y / chunkSize) * chunkSize,
+            Mathf.FloorToInt(character.position.z / chunkSize) * chunkSize);
+
+        
+        if(oldCharacterChunkPosition.x != characterChunkPosition.x || 
+            oldCharacterChunkPosition.y != characterChunkPosition.y || 
+            oldCharacterChunkPosition.z != characterChunkPosition.z) // if the player enters a new chunk
+        {
+            oldCharacterChunkPosition = characterChunkPosition;
+
+            // iterate in a cubic region surrounding the player
+            for (int x = (int)characterChunkPosition.x - chunkSize * renderDistance; x <= (int)characterChunkPosition.x + chunkSize * renderDistance; x += chunkSize)
+                for (int y = (int)characterChunkPosition.y - chunkSize * renderDistance; y <= (int)characterChunkPosition.y + chunkSize * renderDistance; y += chunkSize)
+                    for (int z = (int)characterChunkPosition.z - chunkSize * renderDistance; z <= (int)characterChunkPosition.z + chunkSize * renderDistance; z += chunkSize)
+                    {
+                        Vector3 chunkPosition = new Vector3(x, y, z);
+
+                        // determine if chunks already exists or will exist
+                        // if so, no need to generate
+                        if(!chunks.ContainsKey(chunkPosition) && !ungeneratedChunks.Contains(chunkPosition))
+                        {
+                            if (generateInstantly) 
+                                BuildChunk(chunkPosition);
+                            else 
+                                ungeneratedChunks.Add(chunkPosition);
+                        }
+                    }
+
+            // to remove chunks too far away
+            List<Vector3> chunksToDestroy = new List<Vector3>();
+
+            foreach(KeyValuePair<Vector3, GenerateChunkTerrain> chunkPair in chunks)
+            {
+                Vector3 chunkPos = chunkPair.Key;
+
+                // add all chunks outside of chunk render distance relative to player
+                if(Mathf.Abs(characterChunkPosition.x - chunkPos.x) > chunkSize * (renderDistance + 3) || 
+                    Mathf.Abs(characterChunkPosition.y - chunkPos.y) > chunkSize * (renderDistance + 3) || 
+                    Mathf.Abs(characterChunkPosition.z - chunkPos.z) > chunkSize * (renderDistance + 3))
+                        chunksToDestroy.Add(chunkPos);
+            }
+
+            //remove chunks that may be generated in the future
+            foreach(Vector3 chunkPos in ungeneratedChunks)
+            {
+                // add all chunks outside of chunk render distance relative to player
+                if (Mathf.Abs(characterChunkPosition.x - chunkPos.x) > chunkSize * (renderDistance + 1) || 
+                    Mathf.Abs(characterChunkPosition.y - chunkPos.y) > chunkSize * (renderDistance + 1) || 
+                    Mathf.Abs(characterChunkPosition.z - chunkPos.z) > chunkSize * (renderDistance + 1))
+                        ungeneratedChunks.Remove(chunkPos);
+            }
+
+            // Remove chunks designated for removal
+            foreach (Vector3 chunkPos in chunksToDestroy)
+            {
+                chunks[chunkPos].gameObject.SetActive(false);
+                chunkPool.Add(chunks[chunkPos]);
+                chunks.Remove(chunkPos);
+            }
+
+            StartCoroutine(DelayChunkGeneration());
+        }
+    }
+
+    // Delay chunk generation while we build ungenerated chunks
+    IEnumerator DelayChunkGeneration()
+    {
+        while(ungeneratedChunks.Count > 0)
+        {
+            BuildChunk(ungeneratedChunks[0]);
+            ungeneratedChunks.RemoveAt(0);
+        }
+
+        yield return new WaitForSeconds(0.2f);
     }
 }
