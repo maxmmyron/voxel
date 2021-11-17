@@ -34,4 +34,17 @@ public class GenerateTerrain : MonoBehaviour
         noiseOffset = new Vector3(Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f));
         Generate();
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown("g"))
+        {
+            for(int i = 1; i < transform.childCount; i++)
+            {
+                GameObject.Destroy(transform.GetChild(i).gameObject);
+            }
+            noiseOffset = new Vector3(Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f), Random.Range(0.0f, 100.0f));
+            Generate();
+        }
+    }
 }
