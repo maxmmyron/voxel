@@ -24,23 +24,7 @@ public class GenerateChunkTerrain : MonoBehaviour
     {
         gameObject.transform.parent = GameObject.Find("Terrain").transform;
         gameObject.layer = LayerMask.NameToLayer("Ground");
-
-        //GenerateNoisePoints(voxelPoints);
-
-        //BuildMesh(voxelPoints);
     }
-
-    // Generates a 3D array of block types, where 0 is ground and 1 is air. 
-    /*private void GenerateNoisePoints(int[,,] pointArray)
-    {
-        for(int x = 0; x < pointArray.GetLength(0); x++)
-            for(int y = 0; y < pointArray.GetLength(1); y++)
-                for(int z = 0; z < pointArray.GetLength(2); z++)
-                {
-                    float noiseValue = noise.GetSimplex((x + gameObject.transform.position.x) * scale, (y + gameObject.transform.position.y) * scale, (z + gameObject.transform.position.z) * scale);
-                    pointArray[x, y, z] = noiseValue >= threshold ? 0 : 1;
-                }
-    }*/
 
     public void BuildMesh(int[,,] pointArray)
     {

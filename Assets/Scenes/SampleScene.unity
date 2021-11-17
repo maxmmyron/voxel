@@ -155,10 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97305fa99cc50fb4b9ff0331e1453454, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  threshold: 0
-  scale: 1
   material: {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
-  noiseOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &3785841
 Transform:
   m_ObjectHideFlags: 0
@@ -477,7 +474,7 @@ Camera:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 3
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -551,7 +548,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2f2d4c42d223d14597d96c9c4702f54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderWireframe: 0
+  renderWireframe: 1
 --- !u!1 &1892978693
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,7 +582,9 @@ MonoBehaviour:
   character: {fileID: 1976780365}
   chunkSize: 16
   noiseOffset: {x: 0, y: 0, z: 0}
-  renderDistance: 4
+  renderDistance: 6
+  terrainThreshold: 0
+  terrainScale: 4
 --- !u!4 &1892978695
 Transform:
   m_ObjectHideFlags: 0
@@ -626,7 +625,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1976780364}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 105, y: 174.9, z: 32}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 460241443}
