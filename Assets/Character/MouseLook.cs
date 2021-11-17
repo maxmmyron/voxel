@@ -24,10 +24,16 @@ public class MouseLook : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
+        // dont do anything if the movement is too high
+        // this is most often a result of the mouse movement going a little nuts when new chunks generate
+        if (Mathf.Abs(mouseX) > 20 || Mathf.Abs(mouseY) > 20)
+            return;
+
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90, 90);
 
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        
         controllerBody.Rotate(Vector3.up * mouseX);
     }
 }
