@@ -11,6 +11,9 @@ public class GenerateTerrain : MonoBehaviour
     private Transform character;
 
     [SerializeField]
+    private NoiseSettings noiseSettings;
+
+    [SerializeField]
     private int chunkSize = 16;
 
     [SerializeField]
@@ -18,15 +21,9 @@ public class GenerateTerrain : MonoBehaviour
 
     [SerializeField]
     private int renderDistance = 8;
-
-    [SerializeField]
-    private float terrainThreshold = 0f;
     
     [SerializeField]
     private float secondsToWait = 0.2f;
-
-    [SerializeField]
-    private float terrainScale = 0.5f;
 
     public static Dictionary<Vector3, GenerateChunkTerrain> chunks = new Dictionary<Vector3, GenerateChunkTerrain>();
 
@@ -68,7 +65,7 @@ public class GenerateTerrain : MonoBehaviour
             for (int y = 0; y < chunkToBuild.voxelPoints.GetLength(1); y++)
                 for (int z = 0; z < chunkToBuild.voxelPoints.GetLength(2); z++)
                 {
-                    chunkToBuild.voxelPoints[x, y, z] = noise.GetNoise((x + chunkPosition.x) * terrainScale, (y + chunkPosition.y) * terrainScale, (z + chunkPosition.z) * terrainScale) >= terrainThreshold ? 0 : 1;
+                    chunkToBuild.voxelPoints[x, y, z] = GetPointFromNoise(new Vector3(x,y,z), chunkPosition);
                 }
 
         chunkToBuild.BuildMesh(chunkToBuild.voxelPoints);
@@ -157,5 +154,35 @@ public class GenerateTerrain : MonoBehaviour
         }
 
         yield return new WaitForSeconds(secondsToWait);
+    }
+
+    int GetPointFromNoise(Vector3 position, Vector3 chunkPosition)
+    {
+        // get an adjuested, absolute position based on position of voxel in chunk + chunk position
+        Vector3 adjustedPosition = position + chunkPosition;
+
+        // get factor & frequency values from noiseSettings, since we don't want to mutate the original values
+        float factor = noiseSettings.factor;
+        float frequency = noiseSettings.frequency;
+
+        // set the threshold to half of the original frequency
+        float threshold = noiseSettings.frequency * 0.5f;
+
+        // keep track of noise
+        float noiseValue = adjustedPosition.y < noiseSettings.noiseFloor ? threshold * 1.5f : 0f;
+
+        // loop over octaves
+        for(int i = 0; i < noiseSettings.octaves; i++)
+        {
+            // add noise value adjuested for frequency and factor
+            noiseValue += noise.GetNoise(adjustedPosition.x * frequency, adjustedPosition.y * frequency, adjustedPosition.z * frequency) * factor;
+
+            // adjust factor and frequency values based on persistance and roughness desired
+            factor *= noiseSettings.persistance;
+            frequency *= noiseSettings.roughness;
+        }
+
+        // return based on threshold
+        return noiseValue >= threshold ? 0 : 1;
     }
 }
