@@ -168,8 +168,13 @@ public class GenerateTerrain : MonoBehaviour
         // set the threshold to half of the original frequency
         float threshold = noiseSettings.frequency * 0.5f;
 
+        if (adjustedPosition.y < noiseSettings.noiseFloor)
+        {
+            threshold += Mathf.Abs((noiseSettings.noiseFloor - adjustedPosition.y) * noiseSettings.falloff);
+        }
+
         // keep track of noise
-        float noiseValue = adjustedPosition.y < noiseSettings.noiseFloor ? threshold * 1.5f : 0f;
+        float noiseValue = adjustedPosition.y < noiseSettings.noiseFloor ? threshold : 0f;
 
         // loop over octaves
         for(int i = 0; i < noiseSettings.octaves; i++)
