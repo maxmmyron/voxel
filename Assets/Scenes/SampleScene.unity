@@ -690,12 +690,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 1976780366}
   groundChecker: {fileID: 794357285}
-  camera: {fileID: 963194227}
-  mouseSensitivity: 100
+  playerCamera: {fileID: 963194227}
+  mouseSensitivity: 1000
   movementSpeed: 10
   gravity: -9.81
-  jumpHeight: 2
-  groundCheckDistance: 0.1
+  jumpHeight: 4
+  leftControlMultiplierValue: 2
+  groundCheckDistance: 0.4
   groundMask:
     serializedVersion: 2
     m_Bits: 64

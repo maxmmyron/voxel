@@ -11,7 +11,7 @@ public class CharacterMove : MonoBehaviour
     private Transform groundChecker;
 
     [SerializeField]
-    private Camera camera;
+    private Camera playerCamera;
 
     [SerializeField]
     private int mouseSensitivity = 100;
@@ -24,6 +24,9 @@ public class CharacterMove : MonoBehaviour
 
     [SerializeField]
     private float jumpHeight = 2f;
+    
+    [SerializeField]
+    private float leftControlMultiplierValue = 2f;
 
     [SerializeField]
     private float groundCheckDistance = 0.1f;
@@ -75,11 +78,28 @@ public class CharacterMove : MonoBehaviour
 
         if (isFreecam)
         {
+            // init velocity and control multiplier to values
+            velocity.y = 0f;
+            float ctrlMultiplier = 1f;
+
+            // if jumping, move straight up
+            if (Input.GetButton("Jump"))
+                velocity.y = movementSpeed;
+            // if shifting, move straight down
+            if(Input.GetKey(KeyCode.LeftShift))
+                velocity.y = -movementSpeed;
+
+            // if left control is held, increase multiplier
+            if (Input.GetKey(KeyCode.LeftControl))
+                ctrlMultiplier = leftControlMultiplierValue;
+
+            controller.Move(velocity * ctrlMultiplier * Time.deltaTime);
+
             // set move based on only vertical inputs axis (we move player
             // according to where it is looking on X & Y rotation axis, instead of just X)
-            move = transform.forward * z;
+            move = transform.forward * z * ctrlMultiplier;
             // reset camera rotation
-            camera.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            playerCamera.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
             // if freecam is enabled, we want to locally rotate the character so
             // Vector3.forward will move in the direction the player is looking
             transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
@@ -120,7 +140,7 @@ public class CharacterMove : MonoBehaviour
             // if free cam is not enabled, we want to locally rotate the camera 
             // so Vector3.forward will not move the character in the direction
             // the player is looking, just along that axis
-            camera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
             // rotate the controller along the x axis
             transform.localRotation = Quaternion.Euler(0f, yRotation, 0f);
