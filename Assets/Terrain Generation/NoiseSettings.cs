@@ -24,4 +24,7 @@ public class NoiseSettings : MonoBehaviour
 
     [SerializeField]
     public float falloff = -0.01f;
+
+    [SerializeField]
+    public int falloffFloor = 0;
 }
