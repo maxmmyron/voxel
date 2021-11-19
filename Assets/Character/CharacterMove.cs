@@ -79,25 +79,16 @@ public class CharacterMove : MonoBehaviour
         if (isFreecam)
         {
             // init velocity and control multiplier to values
-            velocity.y = 0f;
             float ctrlMultiplier = 1f;
-
-            // if jumping, move straight up
-            if (Input.GetButton("Jump"))
-                velocity.y = movementSpeed;
-            // if shifting, move straight down
-            if(Input.GetKey(KeyCode.LeftShift))
-                velocity.y = -movementSpeed;
 
             // if left control is held, increase multiplier
             if (Input.GetKey(KeyCode.LeftControl))
                 ctrlMultiplier = leftControlMultiplierValue;
 
-            controller.Move(velocity * ctrlMultiplier * Time.deltaTime);
-
             // set move based on only vertical inputs axis (we move player
             // according to where it is looking on X & Y rotation axis, instead of just X)
-            move = transform.forward * z * ctrlMultiplier;
+            move = transform.right * x * ctrlMultiplier + transform.forward * z * ctrlMultiplier;
+
             // reset camera rotation
             playerCamera.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
             // if freecam is enabled, we want to locally rotate the character so
