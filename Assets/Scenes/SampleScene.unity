@@ -544,6 +544,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1892978695}
   - component: {fileID: 1892978694}
+  - component: {fileID: 1892978696}
   m_Layer: 6
   m_Name: Terrain
   m_TagString: Untagged
@@ -565,12 +566,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chunk: {fileID: 3785839}
   character: {fileID: 1976780365}
+  noiseSettings: {fileID: 1892978696}
   chunkSize: 16
   noiseOffset: {x: 0, y: 0, z: 0}
   renderDistance: 4
-  terrainThreshold: 0
   secondsToWait: 0.1
-  terrainScale: 1.5
 --- !u!4 &1892978695
 Transform:
   m_ObjectHideFlags: 0
@@ -585,6 +585,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1892978696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1892978693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db610796834b9b545a8f736fb8722d69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  octaves: 4
+  frequency: 1
+  factor: 1
+  roughness: 2
+  persistance: 0.5
+  noiseFloor: 64
+  falloff: 0.125
 --- !u!1 &1976780364
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,7 +630,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1976780364}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 80, y: 174.9, z: 32}
+  m_LocalPosition: {x: 0, y: 95, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 460241443}
@@ -662,4 +681,4 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  isFreecam: 1
+  isFreecam: 0
