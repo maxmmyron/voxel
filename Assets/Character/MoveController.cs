@@ -29,12 +29,22 @@ public class MoveController : MonoBehaviour
     bool isGrounded;
 
     [SerializeField]
-    private bool debug = false;
+    public bool isFreecam = false;
 
     // Update is called once per frame
     void Update()
     {
-        if (!debug)
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+
+        Vector3 move;
+        if (isFreecam)
+            move = transform.forward * z;
+        else
+            move = transform.right * x + transform.forward * z; // relative movement based on direction player is moving
+
+
+        if (!isFreecam)
         {
             isGrounded = Physics.CheckSphere(groundChecker.position, groundCheckDistance, groundMask);
 
@@ -43,13 +53,6 @@ public class MoveController : MonoBehaviour
                 velocity.y = -2f;
                 controller.slopeLimit = 45f;
             }
-
-            float x = Input.GetAxis("Horizontal");
-            float z = Input.GetAxis("Vertical");
-
-            Vector3 move = transform.right * x + transform.forward * z; // relative movement based on direction player is moving
-
-            controller.Move(move * movementSpeed * Time.deltaTime);
 
             if (isGrounded && Input.GetButtonDown("Jump"))
             {
@@ -61,5 +64,7 @@ public class MoveController : MonoBehaviour
 
             controller.Move(velocity * Time.deltaTime);
         }
+
+        controller.Move(move * movementSpeed * Time.deltaTime);
     }
 }

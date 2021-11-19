@@ -32,8 +32,11 @@ public class MouseLook : MonoBehaviour
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90, 90);
 
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        
+        if (controllerBody.gameObject.GetComponent<MoveController>().isFreecam)
+            controllerBody.Rotate(Vector3.right * mouseY, Space.Self);
+        else
+            transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
         controllerBody.Rotate(Vector3.up * mouseX);
     }
 }
