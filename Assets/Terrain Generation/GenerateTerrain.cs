@@ -25,7 +25,10 @@ public class GenerateTerrain : MonoBehaviour
     [SerializeField]
     private float secondsToWait = 0.2f;
 
-    public static Dictionary<Vector3, GenerateChunkTerrain> chunks = new Dictionary<Vector3, GenerateChunkTerrain>();
+    // keep a list of all generated chunks, so we can quickly save and load these instead of regenerating them
+    public static Dictionary<Vector3, GenerateChunkTerrain> generatedChunks = new Dictionary<Vector3, GenerateChunkTerrain>();
+    // keep a list of all currently rendered chunks
+    public static Dictionary<Vector3, GenerateChunkTerrain> renderedChunks = new Dictionary<Vector3, GenerateChunkTerrain>();
 
     List<GenerateChunkTerrain> chunkPool = new List<GenerateChunkTerrain>();
 
@@ -44,33 +47,28 @@ public class GenerateTerrain : MonoBehaviour
         GenerateChunks();
     }
 
-    // Build a new chunk
+    // Build a chunk
     private void BuildChunk(Vector3 chunkPosition)
-    {
-        GenerateChunkTerrain chunkToBuild; // Create a new GenerateChunkTerrain
-        if(chunkPool.Count > 0) // if there are already chunks in the pool
+    {   
+        GameObject chunkGameObject = Instantiate(chunk, chunkPosition, Quaternion.identity); // instantiate a new chunk
+        GenerateChunkTerrain chunkToBuild = chunkGameObject.GetComponent<GenerateChunkTerrain>();
+
+        if (!generatedChunks.ContainsKey(chunkPosition))
         {
-            chunkToBuild = chunkPool[0]; // set chunk to build as oldest pooled chunk
-            chunkToBuild.gameObject.SetActive(true); // set active
-            chunkPool.RemoveAt(0); // we are storing the oldest pooled chunk, so we can safely remove it from the cunk pool
-            chunkToBuild.transform.position = chunkPosition; // set position
-        }
-        else // if there are no chunks in the pool
+            for (int x = 0; x < chunkToBuild.voxelPoints.GetLength(0); x++)
+                for (int y = 0; y < chunkToBuild.voxelPoints.GetLength(1); y++)
+                    for (int z = 0; z < chunkToBuild.voxelPoints.GetLength(2); z++)
+                        chunkToBuild.voxelPoints[x, y, z] = GetPointFromNoise(new Vector3(x, y, z), chunkPosition);
+
+            chunkToBuild.BuildMesh(chunkToBuild.voxelPoints);
+
+            generatedChunks.Add(chunkPosition, chunkToBuild);
+        } else
         {
-            GameObject chunkGameObject = Instantiate(chunk, chunkPosition, Quaternion.identity); // instantiate a new chunk
-            chunkToBuild = chunkGameObject.GetComponent<GenerateChunkTerrain>();
+            chunkToBuild.BuildMesh(generatedChunks[chunkPosition].voxelPoints);
         }
-
-        for (int x = 0; x < chunkToBuild.voxelPoints.GetLength(0); x++)
-            for (int y = 0; y < chunkToBuild.voxelPoints.GetLength(1); y++)
-                for (int z = 0; z < chunkToBuild.voxelPoints.GetLength(2); z++)
-                {
-                    chunkToBuild.voxelPoints[x, y, z] = GetPointFromNoise(new Vector3(x,y,z), chunkPosition);
-                }
-
-        chunkToBuild.BuildMesh(chunkToBuild.voxelPoints);
-
-        chunks.Add(chunkPosition, chunkToBuild);
+        
+        renderedChunks.Add(chunkPosition, chunkToBuild);
     }
 
     // Generate chunks
@@ -99,11 +97,11 @@ public class GenerateTerrain : MonoBehaviour
 
                         // determine if chunks already exists or will exist
                         // if so, no need to generate
-                        if(!chunks.ContainsKey(chunkPosition) && !ungeneratedChunks.Contains(chunkPosition))
+                        if(!renderedChunks.ContainsKey(chunkPosition) && !ungeneratedChunks.Contains(chunkPosition))
                         {
-                            if (generateInstantly) 
+                            if (generateInstantly)
                                 BuildChunk(chunkPosition);
-                            else 
+                            else
                                 ungeneratedChunks.Add(chunkPosition);
                         }
                     }
@@ -111,7 +109,7 @@ public class GenerateTerrain : MonoBehaviour
             // to remove chunks too far away
             List<Vector3> chunksToDestroy = new List<Vector3>();
 
-            foreach(KeyValuePair<Vector3, GenerateChunkTerrain> chunkPair in chunks)
+            foreach(KeyValuePair<Vector3, GenerateChunkTerrain> chunkPair in renderedChunks)
             {
                 Vector3 chunkPos = chunkPair.Key;
 
@@ -135,9 +133,8 @@ public class GenerateTerrain : MonoBehaviour
             // Remove chunks designated for removal
             foreach (Vector3 chunkPos in chunksToDestroy)
             {
-                chunks[chunkPos].gameObject.SetActive(false);
-                chunkPool.Add(chunks[chunkPos]);
-                chunks.Remove(chunkPos);
+                renderedChunks[chunkPos].gameObject.SetActive(false);
+                renderedChunks.Remove(chunkPos);
             }
 
             StartCoroutine(DelayChunkGeneration());
