@@ -49,7 +49,9 @@ public class GenerateTerrain : MonoBehaviour
 
     // Build a chunk
     private void BuildChunk(Vector3 chunkPosition)
-    {   
+    {
+        
+
         GameObject chunkGameObject = Instantiate(chunk, chunkPosition, Quaternion.identity); // instantiate a new chunk
         GenerateChunkTerrain chunkToBuild = chunkGameObject.GetComponent<GenerateChunkTerrain>();
 
@@ -186,5 +188,8 @@ public class GenerateTerrain : MonoBehaviour
 
         // return based on threshold
         return noiseValue >= threshold ? 0 : 1;
+
+        // create a new ComputeBuffer with a size of the voxelPoints.
+        // the "4" here references how each int is 32 bits, or 4 bytes.
     }
 }

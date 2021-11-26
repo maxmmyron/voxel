@@ -1,0 +1,9 @@
+#pragma kernel ComputeVoxelPoints
+
+RWStructuredBuffer<int3> voxelPoints;
+RWStructuredBuffer<int> meshPoints;
+
+[numthreads(64,1,1)]
+void ComputeVoxelPoints(uint3 id: SV_DispatchThreadID) {
+    meshPoints[id.x] = 0;
+}
