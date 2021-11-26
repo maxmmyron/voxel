@@ -604,6 +604,7 @@ MonoBehaviour:
   persistance: 0.5
   noiseFloor: 64
   falloff: 0.125
+  falloffFloor: 0
 --- !u!1 &1976780364
 GameObject:
   m_ObjectHideFlags: 0
