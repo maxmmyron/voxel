@@ -160,8 +160,8 @@ public class GenerateTerrain : MonoBehaviour
         // get an adjuested, absolute position based on position of voxel in chunk + chunk position
         Vector3 adjustedPosition = position + chunkPosition;
 
-        // get factor & frequency values from noiseSettings, since we don't want to mutate the original values
-        float factor = noiseSettings.factor;
+        // get amplitude & frequency values from noiseSettings, since we don't want to mutate the original values
+        float amplitude = noiseSettings.amplitude;
         float frequency = noiseSettings.frequency;
 
         // set the threshold to half of the original frequency
@@ -178,11 +178,11 @@ public class GenerateTerrain : MonoBehaviour
         // loop over octaves
         for(int i = 0; i < noiseSettings.octaves; i++)
         {
-            // add noise value adjuested for frequency and factor
-            noiseValue += noise.GetNoise(adjustedPosition.x * frequency, adjustedPosition.y * frequency, adjustedPosition.z * frequency) * factor;
+            // add noise value adjuested for frequency and amplitude
+            noiseValue += noise.GetNoise(adjustedPosition.x * frequency, adjustedPosition.y * frequency, adjustedPosition.z * frequency) * amplitude;
 
-            // adjust factor and frequency values based on persistance and roughness desired
-            factor *= noiseSettings.persistance;
+            // adjust amplitude and frequency values based on persistance and roughness desired
+            amplitude *= noiseSettings.persistance;
             frequency *= noiseSettings.roughness;
         }
 
